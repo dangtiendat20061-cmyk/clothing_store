@@ -123,7 +123,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
               itemBuilder: (context, index) {
                 final item = products[index];
                 double finalPrice = isInternational
-                    ? (item['price_vnd'] * 4)
+                    ? (item['price_vnd'] * 4).toDouble()
                     : item['price_vnd'].toDouble();
 
                 return Card(
