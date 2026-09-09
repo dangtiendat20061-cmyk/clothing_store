@@ -31,27 +31,27 @@ class _ProductListScreenState extends State<ProductListScreen> {
   bool isInternational = false;
   bool isLoading = true;
 
-  // Danh sách sản phẩm quần áo mẫu (Giá gốc VNĐ)
+  // Dùng link ảnh Unsplash nhẹ và ổn định hơn hẳn picsum
   final List<Map<String, dynamic>> products = [
     {
       'name': 'Áo Thun Oversize Streetwear',
       'price_vnd': 250000,
-      'image': 'https://picsum.photos/300/300?random=1'
+      'image': 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400'
     },
     {
       'name': 'Áo Sơ Mi Cổ Tàu Premium',
       'price_vnd': 350000,
-      'image': 'https://picsum.photos/300/300?random=2'
+      'image': 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400'
     },
     {
       'name': 'Quần Cargo Pants Pocket',
       'price_vnd': 420000,
-      'image': 'https://picsum.photos/300/300?random=3'
+      'image': 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=400'
     },
     {
       'name': 'Áo Hoodies Basic Local Brand',
       'price_vnd': 500000,
-      'image': 'https://picsum.photos/300/300?random=4'
+      'image': 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=400'
     },
   ];
 
@@ -61,28 +61,26 @@ class _ProductListScreenState extends State<ProductListScreen> {
     checkUserLocation();
   }
 
-  // Tự động kiểm tra IP để xác định quốc gia
-  // Logic kiểm tra IP Geolocation (Có Timeout an toàn)
   Future<void> checkUserLocation() async {
     try {
       final response = await http
           .get(Uri.parse('https://ipapi.co/json/'))
-          .timeout(const Duration(seconds: 3)); // Thêm timeout 3 giây
+          .timeout(const Duration(seconds: 2));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         String countryCode = data['country_code'] ?? 'VN';
-
-        setState(() {
-          isInternational = (countryCode != 'VN');
-          isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            isInternational = (countryCode != 'VN');
+            isLoading = false;
+          });
+        }
       } else {
-        setState(() => isLoading = false);
+        if (mounted) setState(() => isLoading = false);
       }
     } catch (e) {
-      // Nếu lỗi mạng, quá 3 giây hoặc bị chặn API -> Mặc định hiện giá VN
-      setState(() => isLoading = false);
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
@@ -92,19 +90,19 @@ class _ProductListScreenState extends State<ProductListScreen> {
       appBar: AppBar(
         title: const Text('Clothing Store Portfolio'),
         actions: [
-          // Nút toggle giả lập đổi qua lại giữa khách VN và Quốc tế
           IconButton(
             icon: Icon(isInternational ? Icons.public : Icons.home),
             onPressed: () {
               setState(() {
                 isInternational = !isInternational;
               });
+              ScaffoldMessenger.of(context).clearSnackBars();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(isInternational
                       ? 'Chế độ Quốc tế (Giá x4)'
                       : 'Chế độ Việt Nam (Giá gốc)'),
-                  duration: const Duration(seconds: 1),
+                  duration: const Duration(milliseconds: 800),
                 ),
               );
             },
@@ -138,6 +136,18 @@ class _ProductListScreenState extends State<ProductListScreen> {
                           item['image'],
                           width: double.infinity,
                           fit: BoxFit.cover,
+                          // Chống lag/treo app khi tải ảnh
+                          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                            if (wasSynchronouslyLoaded) return child;
+                            return AnimatedOpacity(
+                              opacity: frame == null ? 0 : 1,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeOut,
+                              child: child,
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Center(child: Icon(Icons.broken_image, size: 40)),
                         ),
                       ),
                       Padding(
@@ -147,8 +157,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                           children: [
                             Text(
                               item['name'],
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold),
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -156,9 +165,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                             Text(
                               '${finalPrice.toStringAsFixed(0)} VNĐ',
                               style: TextStyle(
-                                color: isInternational
-                                    ? Colors.red
-                                    : Colors.green,
+                                color: isInternational ? Colors.red : Colors.green,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                               ),
