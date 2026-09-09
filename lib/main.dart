@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'theme.dart';
 
 void main() {
   runApp(const ClothingStoreApp());
@@ -14,7 +15,7 @@ class ClothingStoreApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Clothing Store',
-      theme: ThemeData(primarySwatch: Colors.indigo, useMaterial3: true),
+      theme: AppTheme.dark,
       home: const ProductListScreen(),
     );
   }
@@ -88,7 +89,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Clothing Store Portfolio'),
+        title: const Text('DEAD ROSES™'),
         actions: [
           IconButton(
             icon: Icon(isInternational ? Icons.public : Icons.home),
@@ -127,47 +128,84 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     : item['price_vnd'].toDouble();
 
                 return Card(
-                  elevation: 3,
+                  clipBehavior: Clip.antiAlias,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: Image.asset(
-                          item['image'],
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          // Chống lag/treo app khi tải ảnh
-                          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-                            if (wasSynchronouslyLoaded) return child;
-                            return AnimatedOpacity(
-                              opacity: frame == null ? 0 : 1,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeOut,
-                              child: child,
-                            );
-                          },
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Center(child: Icon(Icons.broken_image, size: 40)),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.asset(
+                              item['image'],
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              // Chống lag/treo app khi tải ảnh
+                              frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                                if (wasSynchronouslyLoaded) return child;
+                                return AnimatedOpacity(
+                                  opacity: frame == null ? 0 : 1,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeOut,
+                                  child: child,
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) => Container(
+                                color: AppColors.surfaceLight,
+                                child: const Center(
+                                  child: Icon(Icons.broken_image,
+                                      size: 40, color: AppColors.textSecondary),
+                                ),
+                              ),
+                            ),
+                            // Lớp gradient tối phía dưới ảnh để chữ nổi hơn nếu ảnh sáng
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              height: 40,
+                              child: Container(
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [Colors.transparent, Colors.black87],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(10.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               item['name'],
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: Theme.of(context).textTheme.titleMedium,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${finalPrice.toStringAsFixed(0)} VNĐ',
-                              style: TextStyle(
-                                color: isInternational ? Colors.red : Colors.green,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                            const SizedBox(height: 6),
+                            ShaderMask(
+                              shaderCallback: (bounds) => (isInternational
+                                      ? const LinearGradient(
+                                          colors: [
+                                            AppColors.accentRed,
+                                            AppColors.accentPink
+                                          ],
+                                        )
+                                      : AppColors.neonGradient)
+                                  .createShader(bounds),
+                              child: Text(
+                                '${finalPrice.toStringAsFixed(0)} VNĐ',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 17,
+                                ),
                               ),
                             ),
                           ],
