@@ -36,22 +36,22 @@ class _ProductListScreenState extends State<ProductListScreen> {
     {
       'name': 'Áo Thun Oversize Streetwear',
       'price_vnd': 250000,
-      'image': 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400'
+      'image': 'assets/images/ao_thun.jpg' // Đường dẫn ảnh local
     },
     {
       'name': 'Áo Sơ Mi Cổ Tàu Premium',
       'price_vnd': 350000,
-      'image': 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400'
+      'image': 'assets/images/ao_so_mi.jpg'
     },
     {
       'name': 'Quần Cargo Pants Pocket',
       'price_vnd': 420000,
-      'image': 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=400'
+      'image': 'assets/images/quan_cargo.jpg'
     },
     {
       'name': 'Áo Hoodies Basic Local Brand',
       'price_vnd': 500000,
-      'image': 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=400'
+      'image': 'assets/images/hoodie.jpg'
     },
   ];
 
@@ -132,7 +132,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: Image.network(
+                        child: Image.asset(
                           item['image'],
                           width: double.infinity,
                           fit: BoxFit.cover,
