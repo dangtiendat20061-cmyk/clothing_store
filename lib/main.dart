@@ -62,20 +62,26 @@ class _ProductListScreenState extends State<ProductListScreen> {
   }
 
   // Tự động kiểm tra IP để xác định quốc gia
+  // Logic kiểm tra IP Geolocation (Có Timeout an toàn)
   Future<void> checkUserLocation() async {
     try {
-      final response = await http.get(Uri.parse('https://ipapi.co/json/'));
+      final response = await http
+          .get(Uri.parse('https://ipapi.co/json/'))
+          .timeout(const Duration(seconds: 3)); // Thêm timeout 3 giây
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         String countryCode = data['country_code'] ?? 'VN';
 
         setState(() {
-          // Nếu không phải VN -> Đánh dấu là khách quốc tế (x4 giá)
           isInternational = (countryCode != 'VN');
           isLoading = false;
         });
+      } else {
+        setState(() => isLoading = false);
       }
     } catch (e) {
+      // Nếu lỗi mạng, quá 3 giây hoặc bị chặn API -> Mặc định hiện giá VN
       setState(() => isLoading = false);
     }
   }
