@@ -5,9 +5,11 @@ import 'package:provider/provider.dart';
 import '../data/sample_product.dart';
 import '../state/cart_model.dart';
 import '../state/region_model.dart';
+import '../state/auth_model.dart';
 import '../widgets/product_card.dart';
 import '../theme.dart';
 import 'cart_screen.dart';
+import 'login_screen.dart';
  
 class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
@@ -70,6 +72,23 @@ class _ProductListScreenState extends State<ProductListScreen> {
               );
             },
           ),
+          IconButton(
+            icon: Icon(context.watch<AuthModel>().isLoggedIn
+                ? Icons.person
+                : Icons.person_outline),
+            onPressed: () {
+              final auth = context.read<AuthModel>();
+              if (auth.isLoggedIn) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Xin chào, ${auth.fullName}')),
+                );
+              } else {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                );
+              }
+            },
+          ),
           Stack(
             alignment: Alignment.center,
             children: [
@@ -122,3 +141,4 @@ class _ProductListScreenState extends State<ProductListScreen> {
     );
   }
 }
+ 

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'theme.dart';
 import 'state/cart_model.dart';
 import 'state/region_model.dart';
+import 'state/auth_model.dart';
 import 'screens/product_list_screen.dart';
  
 void main() {
@@ -18,6 +19,7 @@ class ClothingStoreApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => RegionModel()),
         ChangeNotifierProvider(create: (_) => CartModel()),
+        ChangeNotifierProvider(create: (_) => AuthModel()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
