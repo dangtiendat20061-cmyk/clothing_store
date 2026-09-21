@@ -33,6 +33,9 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final region = context.watch<RegionModel>();
     final finalPrice = region.priceFor(product.priceVnd);
+    final assetPath = product.imagePath != null
+        ? 'assets/images/${product.imagePath}'
+        : null;
  
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -54,22 +57,24 @@ class ProductCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.asset(
-                    product.image,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-                      if (wasSynchronouslyLoaded) return child;
-                      return AnimatedOpacity(
-                        opacity: frame == null ? 0 : 1,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeOut,
-                        child: child,
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) =>
-                        _buildImagePlaceholder(),
-                  ),
+                  assetPath != null
+                      ? Image.asset(
+                          assetPath,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                            if (wasSynchronouslyLoaded) return child;
+                            return AnimatedOpacity(
+                              opacity: frame == null ? 0 : 1,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeOut,
+                              child: child,
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) =>
+                              _buildImagePlaceholder(),
+                        )
+                      : _buildImagePlaceholder(),
                   Positioned(
                     left: 0,
                     right: 0,

@@ -1,12 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
  
-/// Đổi baseUrl này tùy theo môi trường chạy (xem hướng dẫn kèm theo):
-/// - Android Emulator: 10.0.2.2
-/// - iOS Simulator: localhost
-/// - Thiết bị thật: IP LAN của máy tính, ví dụ 192.168.1.5
 class ApiConfig {
-  static const String baseUrl = 'https://10.0.2.2:7251/api';
+  static const String baseUrl = 'http://10.0.2.2:9823/api';
 }
  
 class ApiException implements Exception {

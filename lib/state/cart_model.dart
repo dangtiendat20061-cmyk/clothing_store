@@ -11,7 +11,7 @@ class CartLine {
  
 /// Quản lý toàn bộ giỏ hàng: thêm, bớt, xóa, tính tổng.
 class CartModel extends ChangeNotifier {
-  final Map<String, CartLine> _lines = {}; // key = product.name
+  final Map<int, CartLine> _lines = {}; // key = product.id
  
   List<CartLine> get lines => _lines.values.toList();
  
@@ -21,27 +21,27 @@ class CartModel extends ChangeNotifier {
   bool get isEmpty => _lines.isEmpty;
  
   void addProduct(Product product) {
-    if (_lines.containsKey(product.name)) {
-      _lines[product.name]!.quantity++;
+    if (_lines.containsKey(product.id)) {
+      _lines[product.id]!.quantity++;
     } else {
-      _lines[product.name] = CartLine(product: product);
+      _lines[product.id] = CartLine(product: product);
     }
     notifyListeners();
   }
  
   void decreaseProduct(Product product) {
-    final line = _lines[product.name];
+    final line = _lines[product.id];
     if (line == null) return;
     if (line.quantity > 1) {
       line.quantity--;
     } else {
-      _lines.remove(product.name);
+      _lines.remove(product.id);
     }
     notifyListeners();
   }
  
   void removeProduct(Product product) {
-    _lines.remove(product.name);
+    _lines.remove(product.id);
     notifyListeners();
   }
  

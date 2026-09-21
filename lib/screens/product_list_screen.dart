@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-import '../data/sample_product.dart';
+import '../model/product.dart';
+import '../service/product_service.dart';
 import '../state/cart_model.dart';
 import '../state/region_model.dart';
 import '../state/auth_model.dart';
@@ -19,15 +20,43 @@ class ProductListScreen extends StatefulWidget {
 }
  
 class _ProductListScreenState extends State<ProductListScreen> {
+  final ProductService _productService = ProductService();
+ 
   bool isLoading = true;
+  String? errorMessage;
+  List<Product> products = [];
  
   @override
   void initState() {
     super.initState();
-    checkUserLocation();
+    _loadData();
   }
  
-  Future<void> checkUserLocation() async {
+  Future<void> _loadData() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+ 
+    // Chạy song song: check IP vùng + tải sản phẩm từ API
+    await Future.wait([
+      _checkUserLocation(),
+      _loadProducts(),
+    ]);
+ 
+    if (mounted) setState(() => isLoading = false);
+  }
+ 
+  Future<void> _loadProducts() async {
+    try {
+      final data = await _productService.fetchAll();
+      if (mounted) setState(() => products = data);
+    } catch (e) {
+      if (mounted) setState(() => errorMessage = 'Không tải được sản phẩm. Kiểm tra backend đã chạy chưa.');
+    }
+  }
+ 
+  Future<void> _checkUserLocation() async {
     try {
       final response = await http
           .get(Uri.parse('https://ipapi.co/json/'))
@@ -38,13 +67,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
         final countryCode = data['country_code'] ?? 'VN';
         if (mounted) {
           context.read<RegionModel>().setFromCountryCode(countryCode);
-          setState(() => isLoading = false);
         }
-      } else {
-        if (mounted) setState(() => isLoading = false);
       }
     } catch (e) {
-      if (mounted) setState(() => isLoading = false);
+      // Không sao nếu lỗi, mặc định giữ giá VN
     }
   }
  
@@ -125,20 +151,38 @@ class _ProductListScreenState extends State<ProductListScreen> {
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : GridView.builder(
-              padding: const EdgeInsets.all(12),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.7,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
-              itemCount: sampleProducts.length,
-              itemBuilder: (context, index) {
-                return ProductCard(product: sampleProducts[index]);
-              },
-            ),
+          : errorMessage != null
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(errorMessage!,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodyMedium),
+                        const SizedBox(height: 12),
+                        ElevatedButton(
+                          onPressed: _loadData,
+                          child: const Text('Thử lại'),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : GridView.builder(
+                  padding: const EdgeInsets.all(12),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.7,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                  ),
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    return ProductCard(product: products[index]);
+                  },
+                ),
     );
   }
 }
- 

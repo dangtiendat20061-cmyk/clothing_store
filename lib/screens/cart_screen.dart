@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../state/cart_model.dart';
 import '../state/region_model.dart';
+import '../state/auth_model.dart';
 import '../theme.dart';
-
+import 'checkout_screen.dart';
+import 'login_screen.dart';
+ 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
-
+ 
   @override
   Widget build(BuildContext context) {
     final cart = context.watch<CartModel>();
     final region = context.watch<RegionModel>();
     final total = cart.totalPrice(region.priceFor);
-
+ 
     return Scaffold(
       appBar: AppBar(title: const Text('Giỏ hàng')),
       body: cart.isEmpty
@@ -28,7 +31,7 @@ class CartScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 final line = cart.lines[index];
                 final linePrice = region.priceFor(line.product.priceVnd);
-
+ 
                 return Card(
                   margin: const EdgeInsets.only(bottom: 10),
                   child: ListTile(
@@ -81,10 +84,19 @@ class CartScreen extends StatelessWidget {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Thanh toán đang được xây dựng 🛠️'),
-                          ),
+                        final auth = context.read<AuthModel>();
+                        if (!auth.isLoggedIn) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const LoginScreen()),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Đăng nhập để tiếp tục thanh toán')),
+                          );
+                          return;
+                        }
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const CheckoutScreen()),
                         );
                       },
                       child: const Text('Thanh Toán'),
