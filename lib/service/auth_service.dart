@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
  
 class ApiConfig {
-  static const String baseUrl = 'http://10.0.2.2:9823/api';
+  static const String baseUrl = 'http://localhost:9823/api';
 }
  
 class ApiException implements Exception {
