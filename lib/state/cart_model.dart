@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../model/product.dart';
  
-/// 1 dòng trong giỏ hàng: sản phẩm + số lượng.
 class CartLine {
   final Product product;
   int quantity;
@@ -9,7 +8,6 @@ class CartLine {
   CartLine({required this.product, this.quantity = 1});
 }
  
-/// Quản lý toàn bộ giỏ hàng: thêm, bớt, xóa, tính tổng.
 class CartModel extends ChangeNotifier {
   final Map<int, CartLine> _lines = {}; // key = product.id
  
@@ -20,11 +18,11 @@ class CartModel extends ChangeNotifier {
  
   bool get isEmpty => _lines.isEmpty;
  
-  void addProduct(Product product) {
+  void addProduct(Product product, {int quantity = 1}) {
     if (_lines.containsKey(product.id)) {
-      _lines[product.id]!.quantity++;
+      _lines[product.id]!.quantity += quantity;
     } else {
-      _lines[product.id] = CartLine(product: product);
+      _lines[product.id] = CartLine(product: product, quantity: quantity);
     }
     notifyListeners();
   }
@@ -50,7 +48,6 @@ class CartModel extends ChangeNotifier {
     notifyListeners();
   }
  
-  /// Tổng tiền, cần truyền vào hàm tính giá theo vùng (VN/quốc tế) từ RegionModel.
   double totalPrice(double Function(int priceVnd) priceFor) {
     return _lines.values.fold(0.0, (sum, line) {
       return sum + priceFor(line.product.priceVnd) * line.quantity;

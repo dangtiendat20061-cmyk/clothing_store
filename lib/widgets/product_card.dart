@@ -1,125 +1,156 @@
 import 'package:flutter/material.dart';
+import '../utils/format.dart';
 import 'package:provider/provider.dart';
 import '../model/product.dart';
-import '../state/cart_model.dart';
+import '../screens/product_detail_screen.dart';
 import '../state/region_model.dart';
 import '../theme.dart';
- 
+import 'angel_eye_product_frame.dart';
+
 class ProductCard extends StatelessWidget {
-  final Product product;
- 
   const ProductCard({super.key, required this.product});
- 
+
+  final Product product;
+
   Widget _buildImagePlaceholder() {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.surfaceLight, AppColors.surface],
+          colors: [Color(0xFF29232A), AppColors.surface],
         ),
       ),
       child: Center(
-        child: Icon(
-          Icons.checkroom,
-          size: 44,
-          color: AppColors.accentPink.withOpacity(0.5),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.checkroom_outlined,
+                size: 38, color: AppColors.accentPink.withOpacity(.72)),
+            const SizedBox(height: 8),
+            Text('Ảnh đang cập nhật',
+                style: TextStyle(
+                  color: AppColors.textSecondary.withOpacity(.9),
+                  fontSize: 12,
+                )),
+          ],
         ),
       ),
     );
   }
- 
+
+  void _openDetail(BuildContext context) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 400),
+        pageBuilder: (context, animation, _) =>
+            ProductDetailScreen(product: product),
+        transitionsBuilder: (context, animation, _, child) {
+          final curved = CurvedAnimation(parent: animation, curve: Curves.easeOut);
+          return FadeTransition(
+            opacity: curved,
+            child: ScaleTransition(
+              scale: Tween(begin: .96, end: 1.0).animate(curved),
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, .025),
+                  end: Offset.zero,
+                ).animate(curved),
+                child: child,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final region = context.watch<RegionModel>();
     final finalPrice = region.priceFor(product.priceVnd);
-    final assetPath = product.imagePath != null
-        ? 'assets/images/${product.imagePath}'
-        : null;
- 
+    final assetPath = product.imagePath == null
+        ? null
+        : 'asset/images/${product.imagePath}';
+    final imagePath = product.imagePath;
+
     return Card(
+      color: AppColors.surface,
+      elevation: 1,
+      shadowColor: Colors.black.withOpacity(.3),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: const BorderSide(color: AppColors.outline, width: 1),
+      ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () {
-          context.read<CartModel>().addProduct(product);
-          ScaffoldMessenger.of(context).clearSnackBars();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Đã thêm "${product.name}" vào giỏ'),
-              duration: const Duration(milliseconds: 700),
-            ),
-          );
-        },
+        onTap: () => _openDetail(context),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  assetPath != null
-                      ? Image.asset(
-                          assetPath,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-                            if (wasSynchronouslyLoaded) return child;
-                            return AnimatedOpacity(
-                              opacity: frame == null ? 0 : 1,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeOut,
-                              child: child,
-                            );
-                          },
-                          errorBuilder: (context, error, stackTrace) =>
-                              _buildImagePlaceholder(),
-                        )
-                      : _buildImagePlaceholder(),
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    height: 40,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Colors.transparent, Colors.black87],
-                        ),
-                      ),
-                    ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(9),
+                child: Hero(
+                  tag: 'product-image-${product.id}',
+                  child: AngelEyeProductFrame(
+                    borderRadius: 9,
+                    child: imagePath == null || imagePath.isEmpty
+                        ? _buildImagePlaceholder()
+                        : (imagePath.startsWith('http://') ||
+                                imagePath.startsWith('https://')
+                            ? Image.network(
+                                imagePath,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    _buildImagePlaceholder(),
+                              )
+                            : Image.asset(
+                                assetPath!,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                frameBuilder: (context, child, frame, sync) {
+                                  if (sync) return child;
+                                  return AnimatedOpacity(
+                                    opacity: frame == null ? 0 : 1,
+                                    duration: const Duration(milliseconds: 250),
+                                    child: child,
+                                  );
+                                },
+                                errorBuilder: (context, error, stackTrace) =>
+                                    _buildImagePlaceholder(),
+                              )),
                   ),
-                ],
+                ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(10.0),
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     product.name,
-                    style: Theme.of(context).textTheme.titleMedium,
-                    maxLines: 1,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: AppColors.textPrimary,
+                          fontSize: 17,
+                          height: 1.15,
+                        ),
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 6),
-                  ShaderMask(
-                    shaderCallback: (bounds) => (region.isInternational
-                            ? const LinearGradient(
-                                colors: [AppColors.accentRed, AppColors.accentPink],
-                              )
-                            : AppColors.neonGradient)
-                        .createShader(bounds),
-                    child: Text(
-                      '${finalPrice.toStringAsFixed(0)} VNĐ',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 17,
-                      ),
-                    ),
+                  const SizedBox(height: 7),
+                  Text(
+                    '${formatVnd(finalPrice)}',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: region.isInternational
+                              ? AppColors.accentRed
+                              : AppColors.accentPink,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
                   ),
                 ],
               ),
@@ -130,3 +161,4 @@ class ProductCard extends StatelessWidget {
     );
   }
 }
+

@@ -33,10 +33,12 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
+  shared_preferences: ^2.2.3
   cupertino_icons: ^1.0.8
   http: ^1.6.0
   google_fonts: ^6.2.1
   provider: ^6.1.2
+  file_picker: ^11.0.3
 
 dev_dependencies:
   flutter_test:
@@ -61,7 +63,9 @@ flutter:
   uses-material-design: true
 
   assets:
-    - asset/images/
+    - asset/images/death_rose_animation.gif
+    - asset/images/angel_gentle_animation.gif
+    - asset/images/Ethereal_Silver-Haired_Angel_with_White_Wings.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

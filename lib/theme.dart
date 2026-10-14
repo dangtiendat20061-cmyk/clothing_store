@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
  
-/// Bảng màu chủ đạo Emo x Y2K
-/// - Nền tối, accent neon, chi tiết chrome/metallic
 class AppColors {
   AppColors._();
  
   static const Color background = Color(0xFF0D0D0D);
   static const Color surface = Color(0xFF1A1A1A);
   static const Color surfaceLight = Color(0xFF262626);
+  static const Color outline = Color(0xFF40343D);
  
   static const Color accentPink = Color(0xFFFF2D95);
   static const Color accentPurple = Color(0xFFB026FF);
-  static const Color accentRed = Color(0xFFC0392B); // dùng cho giá quốc tế/cảnh báo
+  static const Color accentRed = Color(0xFFC0392B);
  
   static const Color textPrimary = Color(0xFFF5F5F5);
   static const Color textSecondary = Color(0xFF9E9E9E);
@@ -27,7 +26,6 @@ class AppColors {
     end: Alignment.bottomRight,
   );
  
-  /// Gradient neon dùng cho CTA chính (nút mua, giá)
   static const LinearGradient neonGradient = LinearGradient(
     colors: [accentPink, accentPurple],
     begin: Alignment.centerLeft,
@@ -50,65 +48,88 @@ class AppTheme {
         error: AppColors.accentRed,
       ),
  
-      // AppBar tối, chữ heading font gothic
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.background,
         elevation: 0,
         centerTitle: false,
-        titleTextStyle: GoogleFonts.metalMania(
+        titleTextStyle: GoogleFonts.pressStart2p(
           color: AppColors.textPrimary,
-          fontSize: 22,
+          fontSize: 14,
           letterSpacing: 1.2,
         ),
         iconTheme: const IconThemeData(color: AppColors.accentPink),
       ),
- 
-      // Card sản phẩm: nền surface, viền mảnh, bo góc nhẹ kiểu "sticker rách"
+
       cardTheme: CardThemeData(
         color: AppColors.surface,
-        elevation: 6,
-        shadowColor: AppColors.accentPurple.withOpacity(0.35),
+        elevation: 0,
+        margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: BorderSide(color: AppColors.accentPink.withOpacity(0.25)),
+          borderRadius: BorderRadius.zero,
+          side: const BorderSide(color: AppColors.accentPink, width: 2),
         ),
       ),
  
-      // Typography: heading dùng Metal Mania, body dùng Chakra Petch
-      textTheme: TextTheme(
-        headlineLarge: GoogleFonts.metalMania(
+      textTheme: base.textTheme.copyWith(
+  
+        headlineLarge: GoogleFonts.pressStart2p(
           color: AppColors.textPrimary,
-          fontSize: 32,
+          fontSize: 20,
         ),
-        headlineMedium: GoogleFonts.metalMania(
+
+        headlineMedium: GoogleFonts.vt323(
           color: AppColors.textPrimary,
-          fontSize: 24,
+          fontSize: 30,
         ),
-        titleMedium: GoogleFonts.chakraPetch(
+
+        titleMedium: GoogleFonts.vt323(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w600,
-          fontSize: 15,
+          fontSize: 19,
         ),
+        bodyLarge: GoogleFonts.chakraPetch(color: AppColors.textPrimary),
         bodyMedium: GoogleFonts.chakraPetch(
           color: AppColors.textSecondary,
           fontSize: 13,
         ),
-        labelLarge: GoogleFonts.chakraPetch(
+        labelLarge: GoogleFonts.vt323(
           color: AppColors.accentPink,
           fontWeight: FontWeight.bold,
-          fontSize: 16,
+          fontSize: 19,
           letterSpacing: 0.5,
         ),
       ),
  
-      // Nút bấm: viền neon glow, nền surface
+      inputDecorationTheme: InputDecorationTheme(
+        labelStyle: GoogleFonts.chakraPetch(color: AppColors.textSecondary),
+        hintStyle: GoogleFonts.chakraPetch(color: AppColors.textSecondary),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.zero,
+          borderSide: BorderSide(color: AppColors.textSecondary.withOpacity(0.4)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.zero,
+          borderSide: const BorderSide(color: AppColors.accentPink, width: 1.6),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.zero,
+          borderSide: const BorderSide(color: AppColors.accentRed),
+        ),
+      ),
+ 
+      textSelectionTheme: const TextSelectionThemeData(
+        cursorColor: AppColors.accentPink,
+        selectionColor: AppColors.accentPurple,
+        selectionHandleColor: AppColors.accentPink,
+      ),
+ 
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.surfaceLight,
           foregroundColor: AppColors.accentPink,
           side: const BorderSide(color: AppColors.accentPink, width: 1.4),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.zero,
           ),
           textStyle: GoogleFonts.chakraPetch(fontWeight: FontWeight.bold),
         ),
@@ -120,7 +141,7 @@ class AppTheme {
         contentTextStyle: GoogleFonts.chakraPetch(color: AppColors.textPrimary),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.zero,
           side: const BorderSide(color: AppColors.accentPurple),
         ),
       ),
